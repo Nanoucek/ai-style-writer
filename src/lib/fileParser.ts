@@ -33,7 +33,7 @@ async function parsePdf(file: File): Promise<string> {
     const page = await pdf.getPage(i)
     const content = await page.getTextContent()
     const pageText = content.items
-      .filter((item): item is pdfjsLib.TextItem => 'str' in item)
+      .filter((item): item is { str: string } => 'str' in item)
       .map((item) => item.str)
       .join(' ')
     pages.push(pageText)

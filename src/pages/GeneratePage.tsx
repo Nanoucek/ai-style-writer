@@ -26,7 +26,7 @@ export default function GeneratePage() {
   const [stepLabel, setStepLabel] = useState('')
   const [error, setError] = useState('')
 
-  const [draft, setDraft] = useState<GeneratedArticle | null>(null)
+  const [_draft, setDraft] = useState<GeneratedArticle | null>(null)
   const [validation, setValidation] = useState<ValidationResult | null>(null)
   const [finalArticle, setFinalArticle] = useState<GeneratedArticle | null>(null)
   const [copied, setCopied] = useState(false)
@@ -51,6 +51,7 @@ export default function GeneratePage() {
     setInput((prev) => ({ ...prev, [key]: e.target.value }))
 
   async function handleGenerate() {
+    if (!styleProfile || !rulesProfile) return
     if (!input.title.trim() || !input.key_points.trim()) {
       setError('Vyplň alespoň téma a klíčové body.')
       return
