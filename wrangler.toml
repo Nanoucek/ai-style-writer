@@ -1,9 +1,6 @@
 name = "ai-style-writer"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = "dist"
 
-[vars]
-# OPENAI_API_KEY je nastaven jako secret v Cloudflare dashboardu
-# Nikdy ho nedávej sem jako plaintext!
-# Nastav ho přes: wrangler pages secret put OPENAI_API_KEY
+# pages_build_output_dir je pouze pro lokální vývoj (wrangler pages dev)
+# Při deployi přes Cloudflare dashboard se toto pole NENASTAVUJE
