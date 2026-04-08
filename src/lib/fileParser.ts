@@ -32,9 +32,8 @@ async function parsePdf(file: File): Promise<string> {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i)
     const content = await page.getTextContent()
-    const pageText = content.items
-      .filter((item): item is { str: string } => 'str' in item)
-      .map((item) => item.str)
+    const pageText = (content.items as Array<Record<string, unknown>>)
+      .map((item) => (typeof item['str'] === 'string' ? item['str'] : ''))
       .join(' ')
     pages.push(pageText)
   }
