@@ -6,29 +6,21 @@ interface Env {
 
 function buildSystemPrompt(style: Record<string, unknown>, rules: Record<string, unknown>): string {
   const preferredPhrases = Array.isArray(style.preferred_phrases)
-    ? (style.preferred_phrases as string[]).join(', ')
-    : ''
+    ? (style.preferred_phrases as string[]).join(', ') : ''
   const forbiddenPatterns = Array.isArray(style.forbidden_patterns)
-    ? (style.forbidden_patterns as string[]).join(', ')
-    : ''
+    ? (style.forbidden_patterns as string[]).join(', ') : ''
   const hardRules = Array.isArray(rules.hard_rules)
-    ? (rules.hard_rules as string[]).map((r) => `- ${r}`).join('\n')
-    : ''
+    ? (rules.hard_rules as string[]).map((r) => `- ${r}`).join('\n') : ''
   const forbiddenElements = Array.isArray(rules.forbidden_elements)
-    ? (rules.forbidden_elements as string[]).map((r) => `- ${r}`).join('\n')
-    : ''
+    ? (rules.forbidden_elements as string[]).map((r) => `- ${r}`).join('\n') : ''
   const requiredElements = Array.isArray(rules.required_elements)
-    ? (rules.required_elements as string[]).map((r) => `- ${r}`).join('\n')
-    : ''
+    ? (rules.required_elements as string[]).map((r) => `- ${r}`).join('\n') : ''
   const formattingRules = Array.isArray(rules.formatting_rules)
-    ? (rules.formatting_rules as string[]).map((r) => `- ${r}`).join('\n')
-    : ''
+    ? (rules.formatting_rules as string[]).map((r) => `- ${r}`).join('\n') : ''
   const seoRules = Array.isArray(rules.seo_rules)
-    ? (rules.seo_rules as string[]).map((r) => `- ${r}`).join('\n')
-    : ''
+    ? (rules.seo_rules as string[]).map((r) => `- ${r}`).join('\n') : ''
   const lengthRules = Array.isArray(rules.length_rules)
-    ? (rules.length_rules as string[]).map((r) => `- ${r}`).join('\n')
-    : ''
+    ? (rules.length_rules as string[]).map((r) => `- ${r}`).join('\n') : ''
 
   return `Jsi profesionální copywriter. Píšeš články přesně podle zadaného stylového profilu a pravidel. Nikdy nevymýšlíš fakta, která nejsou v zadání.
 
@@ -48,28 +40,21 @@ STYLOVÝ PROFIL AUTORA:
 
 POVINNÁ PRAVIDLA (musí být VŽDY dodržena):
 ${hardRules || '- žádná specifikovaná'}
-
-ZAKÁZANÉ PRVKY (nesmí se nikdy vyskytovat):
+ZAKÁZANÉ PRVKY:
 ${forbiddenElements || '- žádné specifikované'}
-
-POVINNÉ PRVKY (musí být v každém textu):
+POVINNÉ PRVKY:
 ${requiredElements || '- žádné specifikované'}
-
 FORMÁTOVACÍ PRAVIDLA:
 ${formattingRules || '- žádná specifikovaná'}
-
 SEO PRAVIDLA:
 ${seoRules || '- žádná specifikovaná'}
-
 PRAVIDLA DÉLKY:
 ${lengthRules || '- žádná specifikovaná'}
 
 Vracíš POUZE validní JSON objekt.`
 }
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const { request, env } = context
-
+export async function handler(request: Request, env: Env): Promise<Response> {
   if (!env.OPENAI_API_KEY) {
     return Response.json({ error: 'OPENAI_API_KEY není nastaven' }, { status: 500 })
   }
@@ -98,10 +83,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       response_format: { type: 'json_object' },
       max_tokens: 4096,
       messages: [
-        {
-          role: 'system',
-          content: buildSystemPrompt(styleProfile, rulesProfile),
-        },
+        { role: 'system', content: buildSystemPrompt(styleProfile, rulesProfile) },
         {
           role: 'user',
           content: `Napiš článek přesně podle stylového profilu a pravidel.
@@ -113,7 +95,7 @@ Cílová délka: ${articleInput.target_length}
 Účel článku: ${articleInput.purpose}
 Cílová skupina: ${articleInput.target_audience}
 Doplňující informace: ${articleInput.additional_info || 'neuvedeno'}
-${articleInput.supplementary_materials ? `\nDodané podklady a fakta (používej POUZE tato fakta, nevymýšlej další):\n${articleInput.supplementary_materials}` : ''}
+${articleInput.supplementary_materials ? `\nDodané podklady a fakta:\n${articleInput.supplementary_materials}` : ''}
 
 Vrať JSON objekt:
 {

@@ -4,9 +4,7 @@ interface Env {
   OPENAI_API_KEY: string
 }
 
-export const onRequestPost: PagesFunction<Env> = async (context) => {
-  const { request, env } = context
-
+export async function handler(request: Request, env: Env): Promise<Response> {
   if (!env.OPENAI_API_KEY) {
     return Response.json({ error: 'OPENAI_API_KEY není nastaven' }, { status: 500 })
   }
