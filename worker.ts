@@ -6,6 +6,7 @@ import { handler as rewriteArticle } from './functions/api/rewrite-article'
 
 interface Env {
   OPENAI_API_KEY: string
+  APP_PASSWORD: string
   ASSETS: Fetcher
 }
 
@@ -21,11 +22,39 @@ function withCors(response: Response): Response {
   return r
 }
 
+function unauthorized(): Response {
+  return new Response('Přístup odepřen. Zadej heslo.', {
+    status: 401,
+    headers: {
+      'WWW-Authenticate': 'Basic realm="AI Style Writer"',
+      'Content-Type': 'text/plain; charset=utf-8',
+    },
+  })
+}
+
+function checkAuth(request: Request, password: string): boolean {
+  const authHeader = request.headers.get('Authorization')
+  if (!authHeader?.startsWith('Basic ')) return false
+
+  const encoded = authHeader.slice(6)
+  const decoded = atob(encoded)
+  // Formát je "uzivatel:heslo" – akceptujeme libovolné uživatelské jméno
+  const userPassword = decoded.split(':').slice(1).join(':')
+  return userPassword === password
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    // CORS preflight
+    // CORS preflight – nepotřebuje auth
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: CORS_HEADERS })
+    }
+
+    // Ochrana heslem (pouze pokud je APP_PASSWORD nastaven)
+    if (env.APP_PASSWORD) {
+      if (!checkAuth(request, env.APP_PASSWORD)) {
+        return unauthorized()
+      }
     }
 
     const { pathname } = new URL(request.url)
